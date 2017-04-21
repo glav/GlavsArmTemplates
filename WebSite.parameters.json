@@ -5,6 +5,6 @@
     "hostingPlanName": {
       "value": "DockerSonarQubePlan"
     },
-    "skuName": {"value": "B1"}
+    "skuName": {"value": "S1"}
   }
 }
