@@ -1,5 +1,5 @@
 # Linux AppService and SonarQube
-This ARm template will create a Linux AppService and setup the service to use the SonarQube docker container from DockerHub.
+This ARM template will create a Linux AppService and setup the service to use the SonarQube docker container from DockerHub.
 
 ## What it does
 It will perform the following:
@@ -12,4 +12,4 @@ It will perform the following:
 ## Usage
 - \Deploy-AzureResourceGroup.ps1 -ResourceGroupLocation "West US" -ResourceGroupName "SonarQube"
 
-Note: Currently, only "West US", "West Europe" and "Southeast Asia" is supported regions as Linux app service is currently in preview. (See here)[https://docs.microsoft.com/en-us/azure/app-service-web/app-service-linux-intro]
+Note: Currently, only "West US", "West Europe" and "Southeast Asia" is supported regions as Linux app service is currently in preview. [See here](https://docs.microsoft.com/en-us/azure/app-service-web/app-service-linux-intro)
