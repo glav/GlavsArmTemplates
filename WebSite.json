@@ -34,6 +34,10 @@
       "metadata": {
         "description": "Describes plan's instance count"
       }
+    },
+    "dockerRegistryImageName":{
+      "type": "string",
+      "minLength": 1
     }
   },
   "variables": {
@@ -61,7 +65,7 @@
     },
 
     {
-      "apiVersion": "2015-08-01",
+      "apiVersion": "2016-08-01",
       "name": "[variables('webSiteName')]",
       "type": "Microsoft.Web/sites",
       "kind":"app",
@@ -76,11 +80,24 @@
       "properties": {
         "name": "[variables('webSiteName')]",
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
-        "reserved":true
+        "reserved":true,
+        "clientAffinityEnabled":false,
+
+         "siteConfig": {
+            "appSettings": [
+              {
+                "name": "DOCKER_CUSTOM_IMAGE_NAME",
+                "value": "[parameters('dockerRegistryImageName')]"
+              }
+            ],
+            "appCommandLine": "",
+            "linuxFxVersion": "DOCKER|sonarqube"
+        }
       }
     },
+
     {
-      "apiVersion": "2014-04-01",
+      "apiVersion": "2015-04-01",
       "name": "[concat(parameters('hostingPlanName'), '-', resourceGroup().name)]",
       "type": "Microsoft.Insights/autoscalesettings",
       "location": "[resourceGroup().location]",

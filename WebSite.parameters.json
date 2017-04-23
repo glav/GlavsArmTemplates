@@ -5,6 +5,11 @@
     "hostingPlanName": {
       "value": "DockerSonarQubePlan"
     },
-    "skuName": {"value": "S1"}
+    "skuName": {
+      "value": "B2"
+    },
+    "dockerRegistryImageName":{
+      "value":"sonarqube"
+    }
   }
 }
