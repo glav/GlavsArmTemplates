@@ -10,6 +10,6 @@ It will perform the following:
 - Create an AppInsights service with a simple alert to monitor the AppService.
 
 ## Usage
-- \Deploy-AzureResourceGroup.ps1 -ResourceGroupLocation "West US" -ResourceGroupName "SonarQube"
+- Deploy-AzureResourceGroup.ps1 -ResourceGroupLocation "West US" -ResourceGroupName "SonarQube"
 
 Note: Currently, only "West US", "West Europe" and "Southeast Asia" is supported regions as Linux app service is currently in preview. [See here](https://docs.microsoft.com/en-us/azure/app-service-web/app-service-linux-intro)
