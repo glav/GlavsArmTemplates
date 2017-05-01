@@ -43,48 +43,28 @@
       "type": "string",
       "minLength": 5
     },
-    "extensions_DockerExtension_port": {
-      "defaultValue": null,
-      "type": "securestring"
-    },
-    "extensions_DockerExtension_ca": {
-      "defaultValue": null,
-      "type": "securestring"
-    },
-    "extensions_DockerExtension_cert": {
-      "defaultValue": null,
-      "type": "securestring"
-    },
-    "extensions_DockerExtension_key": {
-      "defaultValue": null,
-      "type": "securestring"
-    },
-    "disks_sonarqubepostgress_OsDisk_1_995316d270574a0fb32b9682c7cfc98b_name": {
-      "defaultValue": "sonarqubepostgress_OsDisk_1_995316d270574a0fb32b9682c7cfc98b",
+    "disks_OsDisk_name": {
+      "defaultValue": "sonarqubepostgres_OsDisk_1_995316d270574a0fb32b9682c7cfc98b",
       "type": "string"
     },
-    "virtualMachines_sonarqubepostgress_name": {
-      "defaultValue": "sonarqubepostgress",
+    "virtualMachines_name": {
+      "defaultValue": "sonarqubepostgresVM",
       "type": "string"
     },
-    "networkInterfaces_sonarqubepostgress215_name": {
-      "defaultValue": "sonarqubepostgress215",
+    "networkInterfaces_name": {
+      "defaultValue": "sonarqubepostgres215",
       "type": "string"
     },
-    "networkSecurityGroups_sonarqubepostgress_nsg_name": {
-      "defaultValue": "sonarqubepostgress-nsg",
+    "networkSecurityGroups_nsg_name": {
+      "defaultValue": "sonarqubepostgres-nsg",
       "type": "string"
     },
-    "publicIPAddresses_sonarqubepostgress_ip_name": {
-      "defaultValue": "sonarqubepostgress-ip",
+    "publicIPAddresses_ip_name": {
+      "defaultValue": "sonarqubepostgres-ip",
       "type": "string"
     },
     "virtualNetworks_test_vnet_name": {
       "defaultValue": "test-vnet",
-      "type": "string"
-    },
-    "extensions_DockerExtension_name": {
-      "defaultValue": "sonarqubepostgress/DockerExtension",
       "type": "string"
     },
     "postgresVmAdminUser": {
@@ -97,6 +77,11 @@
     }
 
 
+  },
+  "variables": {
+    "instancePrefix": "[toLower(parameters('webSiteName'))]",
+    "networkInterfaceName": "[variables('instancePrefix')]",
+    "extensions_DockerExtension_name": "[concat(parameters('virtualMachines_name'),'/DockerExtension')]"
   },
   "resources": [
     {
@@ -305,9 +290,9 @@
     },
 
     {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Compute/disks/sonarqubepostgress_OsDisk_1_995316d270574a0fb32b9682c7cfc98b'.",
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Compute/disks/sonarqubepostgres_OsDisk_1_995316d270574a0fb32b9682c7cfc98b'.",
       "type": "Microsoft.Compute/disks",
-      "name": "[parameters('disks_sonarqubepostgress_OsDisk_1_995316d270574a0fb32b9682c7cfc98b_name')]",
+      "name": "[parameters('disks_OsDisk_name')]",
       "apiVersion": "2016-04-30-preview",
       "location": "[resourceGroup().location]",
       "properties": {
@@ -324,9 +309,9 @@
       "dependsOn": []
     },
     {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Compute/virtualMachines/sonarqubepostgress'.",
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Compute/virtualMachines/sonarqubepostgres'.",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[parameters('virtualMachines_sonarqubepostgress_name')]",
+      "name": "[parameters('virtualMachines_name')]",
       "apiVersion": "2016-04-30-preview",
       "location": "[resourceGroup().location]",
       "properties": {
@@ -348,7 +333,7 @@
           "dataDisks": []
         },
         "osProfile": {
-          "computerName": "[parameters('virtualMachines_sonarqubepostgress_name')]",
+          "computerName": "[parameters('virtualMachines_name')]",
           "adminUsername": "[parameters('postgresVmAdminUser')]",
           "adminPassword": "[parameters('postgresVmAdminPassword')]",
           "linuxConfiguration": {
@@ -359,20 +344,20 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_sonarqubepostgress215_name'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_name'))]"
             }
           ]
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Compute/disks', parameters('disks_sonarqubepostgress_OsDisk_1_995316d270574a0fb32b9682c7cfc98b_name'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_sonarqubepostgress215_name'))]"
+        "[resourceId('Microsoft.Compute/disks', parameters('disks_OsDisk_name'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_name'))]"
       ]
     },
     {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/networkInterfaces/sonarqubepostgress215'.",
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/networkInterfaces/sonarqubepostgres215'.",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[parameters('networkInterfaces_sonarqubepostgress215_name')]",
+      "name": "[parameters('networkInterfaces_name')]",
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "properties": {
@@ -383,7 +368,7 @@
               "privateIPAddress": "10.0.1.4",
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_sonarqubepostgress_ip_name'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_ip_name'))]"
               },
               "subnet": {
                 "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_test_vnet_name')), '/subnets/default')]"
@@ -396,19 +381,19 @@
         },
         "enableIPForwarding": false,
         "networkSecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_sonarqubepostgress_nsg_name'))]"
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg_name'))]"
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_sonarqubepostgress_ip_name'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_ip_name'))]",
         "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_test_vnet_name'))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_sonarqubepostgress_nsg_name'))]"
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg_name'))]"
       ]
     },
     {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/networkSecurityGroups/sonarqubepostgress-nsg'.",
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/networkSecurityGroups/sonarqubepostgres-nsg'.",
       "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[parameters('networkSecurityGroups_sonarqubepostgress_nsg_name')]",
+      "name": "[parameters('networkSecurityGroups_nsg_name')]",
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "properties": {
@@ -416,7 +401,7 @@
           {
             "name": "allow-ssh-in",
             "properties": {
-              "protocol": "TCP",
+              "protocol": "Tcp",
               "sourcePortRange": "*",
               "destinationPortRange": "22",
               "sourceAddressPrefix": "*",
@@ -429,7 +414,7 @@
           {
             "name": "postgres-allow",
             "properties": {
-              "protocol": "TCP",
+              "protocol": "Tcp",
               "sourcePortRange": "*",
               "destinationPortRange": "5432",
               "sourceAddressPrefix": "*",
@@ -444,9 +429,9 @@
       "dependsOn": []
     },
     {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/publicIPAddresses/sonarqubepostgress-ip'.",
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/publicIPAddresses/sonarqubepostgres-ip'.",
       "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[parameters('publicIPAddresses_sonarqubepostgress_ip_name')]",
+      "name": "[parameters('publicIPAddresses_ip_name')]",
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "properties": {
@@ -479,9 +464,9 @@
       "dependsOn": []
     },
     {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/test/providers/Microsoft.Compute/virtualMachines/sonarqubepostgress/extensions/DockerExtension'.",
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/test/providers/Microsoft.Compute/virtualMachines/sonarqubepostgres/extensions/DockerExtension'.",
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[parameters('extensions_DockerExtension_name')]",
+      "name": "[variables('extensions_DockerExtension_name')]",
       "apiVersion": "2016-04-30-preview",
       "location": "[resourceGroup().location]",
       "properties": {
@@ -490,20 +475,38 @@
         "typeHandlerVersion": "1.0",
         "autoUpgradeMinorVersion": true,
         "settings": {
+          "compose": {
+            "postgres": {
+              "image": "postgres",
+              "restart": "always",
+              "ports": [
+                "5432:5432"
+              ],
+              "environment": [
+                "[concat('POSTGRES_PASSWORD=',parameters('postgresVmAdminPassword'))]"
+              ],
+              "volumes": [
+                "/var/lib/postgresql/data:/var/lib/postgresql/data"
+              ]
+            }
+          },
           "docker": {
-            "port": "[parameters('extensions_DockerExtension_port')]"
+            "port": ""
           }
         },
         "protectedSettings": {
           "certs": {
-            "ca": "[parameters('extensions_DockerExtension_ca')]",
-            "cert": "[parameters('extensions_DockerExtension_cert')]",
-            "key": "[parameters('extensions_DockerExtension_key')]"
+            "ca": "",
+            "cert": "",
+            "key": ""
+          },
+          "environment": {
+            "POSTGRES_PASSWORD": "[concat(parameters('postgresVmAdminPassword'))]"
           }
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_sonarqubepostgress_name'))]"
+        "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_name'))]"
       ]
     }
 
