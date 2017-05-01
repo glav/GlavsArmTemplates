@@ -8,8 +8,50 @@
     "skuName": {
       "value": "B2"
     },
-    "dockerRegistryImageName":{
-      "value":"sonarqube"
+    "dockerRegistryImageName": {
+      "value": "sonarqube"
+    },
+    "webSiteName": {
+      "value": "SonarQubeAppServiceTestTemplate"
+    },
+    "postgresVmAdminUser": {
+      "value": "linuxadminuser"
+    },
+    "postgresVmAdminPassword": {
+      "value": "L1nuxAdminPwd"
+    },
+    "extensions_DockerExtension_port": {
+      "value": ""
+    },
+    "extensions_DockerExtension_ca": {
+      "value": ""
+    },
+    "extensions_DockerExtension_cert": {
+      "value": ""
+    },
+    "extensions_DockerExtension_key": {
+      "value": ""
+    },
+    "disks_sonarqubepostgress_OsDisk_1_995316d270574a0fb32b9682c7cfc98b_name": {
+      "value": "sonarqubepostgress_OsDisk_1_995316d270574a0fb32b9682c7cfc98b"
+    },
+    "virtualMachines_sonarqubepostgress_name": {
+      "value": "sonarqubepostgress"
+    },
+    "networkInterfaces_sonarqubepostgress215_name": {
+      "value": "sonarqubepostgress215"
+    },
+    "networkSecurityGroups_sonarqubepostgress_nsg_name": {
+      "value": "sonarqubepostgress-nsg"
+    },
+    "publicIPAddresses_sonarqubepostgress_ip_name": {
+      "value": "sonarqubepostgress-ip"
+    },
+    "virtualNetworks_test_vnet_name": {
+      "value": "test-vnet"
+    },
+    "extensions_DockerExtension_name": {
+      "value": "sonarqubepostgress/DockerExtension"
     }
   }
 }

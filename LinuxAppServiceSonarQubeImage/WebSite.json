@@ -35,20 +35,75 @@
         "description": "Describes plan's instance count"
       }
     },
-    "dockerRegistryImageName":{
+    "dockerRegistryImageName": {
       "type": "string",
       "minLength": 1
+    },
+    "webSiteName": {
+      "type": "string",
+      "minLength": 5
+    },
+    "extensions_DockerExtension_port": {
+      "defaultValue": null,
+      "type": "securestring"
+    },
+    "extensions_DockerExtension_ca": {
+      "defaultValue": null,
+      "type": "securestring"
+    },
+    "extensions_DockerExtension_cert": {
+      "defaultValue": null,
+      "type": "securestring"
+    },
+    "extensions_DockerExtension_key": {
+      "defaultValue": null,
+      "type": "securestring"
+    },
+    "disks_sonarqubepostgress_OsDisk_1_995316d270574a0fb32b9682c7cfc98b_name": {
+      "defaultValue": "sonarqubepostgress_OsDisk_1_995316d270574a0fb32b9682c7cfc98b",
+      "type": "string"
+    },
+    "virtualMachines_sonarqubepostgress_name": {
+      "defaultValue": "sonarqubepostgress",
+      "type": "string"
+    },
+    "networkInterfaces_sonarqubepostgress215_name": {
+      "defaultValue": "sonarqubepostgress215",
+      "type": "string"
+    },
+    "networkSecurityGroups_sonarqubepostgress_nsg_name": {
+      "defaultValue": "sonarqubepostgress-nsg",
+      "type": "string"
+    },
+    "publicIPAddresses_sonarqubepostgress_ip_name": {
+      "defaultValue": "sonarqubepostgress-ip",
+      "type": "string"
+    },
+    "virtualNetworks_test_vnet_name": {
+      "defaultValue": "test-vnet",
+      "type": "string"
+    },
+    "extensions_DockerExtension_name": {
+      "defaultValue": "sonarqubepostgress/DockerExtension",
+      "type": "string"
+    },
+    "postgresVmAdminUser": {
+      "type": "string",
+      "minLength": 5
+    },
+    "postgresVmAdminPassword": {
+      "type": "string",
+      "minLength": 8
     }
-  },
-  "variables": {
-    "webSiteName": "SonarQubeAppService"
+
+
   },
   "resources": [
     {
       "apiVersion": "2015-08-01",
       "name": "[parameters('hostingPlanName')]",
       "type": "Microsoft.Web/serverfarms",
-      "kind":"linux",
+      "kind": "linux",
       "location": "[resourceGroup().location]",
       "tags": {
         "displayName": "HostingPlan"
@@ -60,15 +115,15 @@
       "properties": {
         "name": "[parameters('hostingPlanName')]",
         "kind": "linux",
-        "reserved":true
+        "reserved": true
       }
     },
 
     {
       "apiVersion": "2016-08-01",
-      "name": "[variables('webSiteName')]",
+      "name": "[parameters('webSiteName')]",
       "type": "Microsoft.Web/sites",
-      "kind":"app",
+      "kind": "app",
       "location": "[resourceGroup().location]",
       "tags": {
         "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource",
@@ -78,20 +133,20 @@
         "[resourceId('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
       ],
       "properties": {
-        "name": "[variables('webSiteName')]",
+        "name": "[parameters('webSiteName')]",
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
-        "reserved":true,
-        "clientAffinityEnabled":false,
+        "reserved": true,
+        "clientAffinityEnabled": false,
 
-         "siteConfig": {
-            "appSettings": [
-              {
-                "name": "DOCKER_CUSTOM_IMAGE_NAME",
-                "value": "[parameters('dockerRegistryImageName')]"
-              }
-            ],
-            "appCommandLine": "",
-            "linuxFxVersion": "DOCKER|sonarqube"
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "DOCKER_CUSTOM_IMAGE_NAME",
+              "value": "[parameters('dockerRegistryImageName')]"
+            }
+          ],
+          "appCommandLine": "",
+          "linuxFxVersion": "DOCKER|sonarqube"
         }
       }
     },
@@ -164,25 +219,25 @@
     },
     {
       "apiVersion": "2014-04-01",
-      "name": "[concat('ServerErrors ', variables('webSiteName'))]",
+      "name": "[concat('ServerErrors ', parameters('webSiteName'))]",
       "type": "Microsoft.Insights/alertrules",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites/', variables('webSiteName'))]"
+        "[resourceId('Microsoft.Web/sites/', parameters('webSiteName'))]"
       ],
       "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('webSiteName'))]": "Resource",
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('webSiteName'))]": "Resource",
         "displayName": "ServerErrorsAlertRule"
       },
       "properties": {
-        "name": "[concat('ServerErrors ', variables('webSiteName'))]",
-        "description": "[concat(variables('webSiteName'), ' has some server errors, status code 5xx.')]",
+        "name": "[concat('ServerErrors ', parameters('webSiteName'))]",
+        "description": "[concat(parameters('webSiteName'), ' has some server errors, status code 5xx.')]",
         "isEnabled": false,
         "condition": {
           "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
           "dataSource": {
             "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
-            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('webSiteName'))]",
+            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('webSiteName'))]",
             "metricName": "Http5xx"
           },
           "operator": "GreaterThan",
@@ -234,20 +289,224 @@
 
     {
       "apiVersion": "2014-04-01",
-      "name": "[variables('webSiteName')]",
+      "name": "[parameters('webSiteName')]",
       "type": "Microsoft.Insights/components",
       "location": "East US",
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites/', variables('webSiteName'))]"
+        "[resourceId('Microsoft.Web/sites/', parameters('webSiteName'))]"
       ],
       "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('webSiteName'))]": "Resource",
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('webSiteName'))]": "Resource",
         "displayName": "AppInsightsComponent"
       },
       "properties": {
-        "applicationId": "[variables('webSiteName')]"
+        "applicationId": "[parameters('webSiteName')]"
       }
+    },
+
+    {
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Compute/disks/sonarqubepostgress_OsDisk_1_995316d270574a0fb32b9682c7cfc98b'.",
+      "type": "Microsoft.Compute/disks",
+      "name": "[parameters('disks_sonarqubepostgress_OsDisk_1_995316d270574a0fb32b9682c7cfc98b_name')]",
+      "apiVersion": "2016-04-30-preview",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "accountType": "Standard_LRS",
+        "osType": "Linux",
+        "creationData": {
+          "createOption": "FromImage",
+          "imageReference": {
+            "id": "/Subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/Providers/Microsoft.Compute/Locations/[resourceGroup().location]/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/16.04.0-LTS/Versions/latest"
+          }
+        },
+        "diskSizeGB": 30
+      },
+      "dependsOn": []
+    },
+    {
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Compute/virtualMachines/sonarqubepostgress'.",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('virtualMachines_sonarqubepostgress_name')]",
+      "apiVersion": "2016-04-30-preview",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "Standard_A1"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "16.04.0-LTS",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "caching": "ReadWrite",
+            "diskSizeGB": 30
+          },
+          "dataDisks": []
+        },
+        "osProfile": {
+          "computerName": "[parameters('virtualMachines_sonarqubepostgress_name')]",
+          "adminUsername": "[parameters('postgresVmAdminUser')]",
+          "adminPassword": "[parameters('postgresVmAdminPassword')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": false
+          },
+          "secrets": []
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_sonarqubepostgress215_name'))]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/disks', parameters('disks_sonarqubepostgress_OsDisk_1_995316d270574a0fb32b9682c7cfc98b_name'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_sonarqubepostgress215_name'))]"
+      ]
+    },
+    {
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/networkInterfaces/sonarqubepostgress215'.",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[parameters('networkInterfaces_sonarqubepostgress215_name')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAddress": "10.0.1.4",
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_sonarqubepostgress_ip_name'))]"
+              },
+              "subnet": {
+                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_test_vnet_name')), '/subnets/default')]"
+              }
+            }
+          }
+        ],
+        "dnsSettings": {
+          "dnsServers": []
+        },
+        "enableIPForwarding": false,
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_sonarqubepostgress_nsg_name'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_sonarqubepostgress_ip_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_test_vnet_name'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_sonarqubepostgress_nsg_name'))]"
+      ]
+    },
+    {
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/networkSecurityGroups/sonarqubepostgress-nsg'.",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[parameters('networkSecurityGroups_sonarqubepostgress_nsg_name')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "allow-ssh-in",
+            "properties": {
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "postgres-allow",
+            "properties": {
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "5432",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 110,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+      "dependsOn": []
+    },
+    {
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/publicIPAddresses/sonarqubepostgress-ip'.",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[parameters('publicIPAddresses_sonarqubepostgress_ip_name')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "idleTimeoutInMinutes": 4
+      },
+      "dependsOn": []
+    },
+    {
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/virtualNetworks/[parameters('virtualNetworks_test_vnet_name')]'.",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('virtualNetworks_test_vnet_name')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.1.0/24"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "default",
+            "properties": {
+              "addressPrefix": "10.0.1.0/24"
+            }
+          }
+        ]
+      },
+      "dependsOn": []
+    },
+    {
+      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/test/providers/Microsoft.Compute/virtualMachines/sonarqubepostgress/extensions/DockerExtension'.",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[parameters('extensions_DockerExtension_name')]",
+      "apiVersion": "2016-04-30-preview",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "DockerExtension",
+        "typeHandlerVersion": "1.0",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "docker": {
+            "port": "[parameters('extensions_DockerExtension_port')]"
+          }
+        },
+        "protectedSettings": {
+          "certs": {
+            "ca": "[parameters('extensions_DockerExtension_ca')]",
+            "cert": "[parameters('extensions_DockerExtension_cert')]",
+            "key": "[parameters('extensions_DockerExtension_key')]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_sonarqubepostgress_name'))]"
+      ]
     }
+
 
   ]
 }
