@@ -64,7 +64,8 @@
     "networkInterfaces_name": "[concat(parameters('virtualMachines_name'),'-nic')]",
     "publicIPAddresses_ip_name": "[concat(parameters('virtualMachines_name'),'-ip')]",
     "networkSecurityGroups_nsg_name": "[concat(parameters('virtualMachines_name'),'-nsg')]",
-    "virtualNetworks_test_vnet_name": "[concat(parameters('virtualMachines_name'),'-vnet')]"
+    "virtualNetworks_test_vnet_name": "[concat(parameters('virtualMachines_name'),'-vnet')]",
+    "postgres_default_user": "postgres"
   },
   "resources": [
     {
@@ -98,7 +99,9 @@
         "displayName": "Website"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
+        "[resourceId('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
+        "[resourceId('Microsoft.Compute/virtualMachines/', parameters('virtualMachines_name'))]"
+
       ],
       "properties": {
         "name": "[parameters('webSiteName')]",
@@ -111,6 +114,18 @@
             {
               "name": "DOCKER_CUSTOM_IMAGE_NAME",
               "value": "[parameters('dockerRegistryImageName')]"
+            },
+            {
+              "name": "SONARQUBE_JDBC_USERNAME",
+              "value": "[variables('postgres_default_user')]"
+            },
+            {
+              "name": "SONARQUBE_JDBC_PASSWORD",
+              "value": "[parameters('postgresVmAdminPassword')]"
+            },
+            {
+              "name": "SONARQUBE_JDBC_URL",
+              "value": "[concat('jdbc:postgresql://',reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddresses_ip_name')),'2016-10-01').ipAddress,'/postgres')]"
             }
           ],
           "appCommandLine": "",
@@ -242,7 +257,7 @@
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "properties": {
-        "publicIPAllocationMethod": "Dynamic",
+        "publicIPAllocationMethod": "Static",
         "idleTimeoutInMinutes": 4
       },
       "dependsOn": []
@@ -316,5 +331,11 @@
     }
 
 
-  ]
+  ],
+  "outputs": {
+    "ipaddress": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddresses_ip_name')),'2016-10-01').ipAddress]",
+      "type": "string"
+    }
+  }
 }
