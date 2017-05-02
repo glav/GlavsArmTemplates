@@ -43,28 +43,8 @@
       "type": "string",
       "minLength": 5
     },
-    "disks_OsDisk_name": {
-      "defaultValue": "sonarqubepostgres_OsDisk_1_995316d270574a0fb32b9682c7cfc98b",
-      "type": "string"
-    },
     "virtualMachines_name": {
       "defaultValue": "sonarqubepostgresVM",
-      "type": "string"
-    },
-    "networkInterfaces_name": {
-      "defaultValue": "sonarqubepostgres215",
-      "type": "string"
-    },
-    "networkSecurityGroups_nsg_name": {
-      "defaultValue": "sonarqubepostgres-nsg",
-      "type": "string"
-    },
-    "publicIPAddresses_ip_name": {
-      "defaultValue": "sonarqubepostgres-ip",
-      "type": "string"
-    },
-    "virtualNetworks_test_vnet_name": {
-      "defaultValue": "test-vnet",
       "type": "string"
     },
     "postgresVmAdminUser": {
@@ -76,12 +56,15 @@
       "minLength": 8
     }
 
-
   },
   "variables": {
     "instancePrefix": "[toLower(parameters('webSiteName'))]",
     "networkInterfaceName": "[variables('instancePrefix')]",
-    "extensions_DockerExtension_name": "[concat(parameters('virtualMachines_name'),'/DockerExtension')]"
+    "extensions_DockerExtension_name": "[concat(parameters('virtualMachines_name'),'/DockerExtension')]",
+    "networkInterfaces_name": "[concat(parameters('virtualMachines_name'),'-nic')]",
+    "publicIPAddresses_ip_name": "[concat(parameters('virtualMachines_name'),'-ip')]",
+    "networkSecurityGroups_nsg_name": "[concat(parameters('virtualMachines_name'),'-nsg')]",
+    "virtualNetworks_test_vnet_name": "[concat(parameters('virtualMachines_name'),'-vnet')]"
   },
   "resources": [
     {
@@ -136,180 +119,8 @@
       }
     },
 
-    {
-      "apiVersion": "2015-04-01",
-      "name": "[concat(parameters('hostingPlanName'), '-', resourceGroup().name)]",
-      "type": "Microsoft.Insights/autoscalesettings",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource",
-        "displayName": "AutoScaleSettings"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
-      ],
-      "properties": {
-        "profiles": [
-          {
-            "name": "Default",
-            "capacity": {
-              "minimum": 1,
-              "maximum": 2,
-              "default": 1
-            },
-            "rules": [
-              {
-                "metricTrigger": {
-                  "metricName": "CpuPercentage",
-                  "metricResourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
-                  "timeGrain": "PT1M",
-                  "statistic": "Average",
-                  "timeWindow": "PT10M",
-                  "timeAggregation": "Average",
-                  "operator": "GreaterThan",
-                  "threshold": 80.0
-                },
-                "scaleAction": {
-                  "direction": "Increase",
-                  "type": "ChangeCount",
-                  "value": 1,
-                  "cooldown": "PT10M"
-                }
-              },
-              {
-                "metricTrigger": {
-                  "metricName": "CpuPercentage",
-                  "metricResourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
-                  "timeGrain": "PT1M",
-                  "statistic": "Average",
-                  "timeWindow": "PT1H",
-                  "timeAggregation": "Average",
-                  "operator": "LessThan",
-                  "threshold": 60.0
-                },
-                "scaleAction": {
-                  "direction": "Decrease",
-                  "type": "ChangeCount",
-                  "value": 1,
-                  "cooldown": "PT1H"
-                }
-              }
-            ]
-          }
-        ],
-        "enabled": false,
-        "name": "[concat(parameters('hostingPlanName'), '-', resourceGroup().name)]",
-        "targetResourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
-      }
-    },
-    {
-      "apiVersion": "2014-04-01",
-      "name": "[concat('ServerErrors ', parameters('webSiteName'))]",
-      "type": "Microsoft.Insights/alertrules",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/sites/', parameters('webSiteName'))]"
-      ],
-      "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('webSiteName'))]": "Resource",
-        "displayName": "ServerErrorsAlertRule"
-      },
-      "properties": {
-        "name": "[concat('ServerErrors ', parameters('webSiteName'))]",
-        "description": "[concat(parameters('webSiteName'), ' has some server errors, status code 5xx.')]",
-        "isEnabled": false,
-        "condition": {
-          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
-          "dataSource": {
-            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
-            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('webSiteName'))]",
-            "metricName": "Http5xx"
-          },
-          "operator": "GreaterThan",
-          "threshold": 0.0,
-          "windowSize": "PT5M"
-        },
-        "action": {
-          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
-          "sendToServiceOwners": true,
-          "customEmails": []
-        }
-      }
-    },
 
     {
-      "apiVersion": "2014-04-01",
-      "name": "[concat('CPUHigh ', parameters('hostingPlanName'))]",
-      "type": "Microsoft.Insights/alertrules",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
-      ],
-      "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource",
-        "displayName": "CPUHighAlertRule"
-      },
-      "properties": {
-        "name": "[concat('CPUHigh ', parameters('hostingPlanName'))]",
-        "description": "[concat('The average CPU is high across all the instances of ', parameters('hostingPlanName'))]",
-        "isEnabled": false,
-        "condition": {
-          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
-          "dataSource": {
-            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
-            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
-            "metricName": "CpuPercentage"
-          },
-          "operator": "GreaterThan",
-          "threshold": 90,
-          "windowSize": "PT15M"
-        },
-        "action": {
-          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
-          "sendToServiceOwners": true,
-          "customEmails": []
-        }
-      }
-    },
-
-    {
-      "apiVersion": "2014-04-01",
-      "name": "[parameters('webSiteName')]",
-      "type": "Microsoft.Insights/components",
-      "location": "East US",
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/sites/', parameters('webSiteName'))]"
-      ],
-      "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('webSiteName'))]": "Resource",
-        "displayName": "AppInsightsComponent"
-      },
-      "properties": {
-        "applicationId": "[parameters('webSiteName')]"
-      }
-    },
-
-    {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Compute/disks/sonarqubepostgres_OsDisk_1_995316d270574a0fb32b9682c7cfc98b'.",
-      "type": "Microsoft.Compute/disks",
-      "name": "[parameters('disks_OsDisk_name')]",
-      "apiVersion": "2016-04-30-preview",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "accountType": "Standard_LRS",
-        "osType": "Linux",
-        "creationData": {
-          "createOption": "FromImage",
-          "imageReference": {
-            "id": "/Subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/Providers/Microsoft.Compute/Locations/[resourceGroup().location]/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/16.04.0-LTS/Versions/latest"
-          }
-        },
-        "diskSizeGB": 30
-      },
-      "dependsOn": []
-    },
-    {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Compute/virtualMachines/sonarqubepostgres'.",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[parameters('virtualMachines_name')]",
       "apiVersion": "2016-04-30-preview",
@@ -344,20 +155,18 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_name'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_name'))]"
             }
           ]
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Compute/disks', parameters('disks_OsDisk_name'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_name'))]"
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_name'))]"
       ]
     },
     {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/networkInterfaces/sonarqubepostgres215'.",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[parameters('networkInterfaces_name')]",
+      "name": "[variables('networkInterfaces_name')]",
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "properties": {
@@ -368,10 +177,10 @@
               "privateIPAddress": "10.0.1.4",
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_ip_name'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_ip_name'))]"
               },
               "subnet": {
-                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_test_vnet_name')), '/subnets/default')]"
+                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworks_test_vnet_name')), '/subnets/default')]"
               }
             }
           }
@@ -381,19 +190,18 @@
         },
         "enableIPForwarding": false,
         "networkSecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg_name'))]"
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_nsg_name'))]"
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_ip_name'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_test_vnet_name'))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg_name'))]"
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_ip_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworks_test_vnet_name'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_nsg_name'))]"
       ]
     },
     {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/networkSecurityGroups/sonarqubepostgres-nsg'.",
       "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[parameters('networkSecurityGroups_nsg_name')]",
+      "name": "[variables('networkSecurityGroups_nsg_name')]",
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "properties": {
@@ -429,9 +237,8 @@
       "dependsOn": []
     },
     {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/publicIPAddresses/sonarqubepostgres-ip'.",
       "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[parameters('publicIPAddresses_ip_name')]",
+      "name": "[variables('publicIPAddresses_ip_name')]",
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "properties": {
@@ -441,9 +248,8 @@
       "dependsOn": []
     },
     {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/[resourceGroup().name]/providers/Microsoft.Network/virtualNetworks/[parameters('virtualNetworks_test_vnet_name')]'.",
       "type": "Microsoft.Network/virtualNetworks",
-      "name": "[parameters('virtualNetworks_test_vnet_name')]",
+      "name": "[variables('virtualNetworks_test_vnet_name')]",
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "properties": {
@@ -464,7 +270,6 @@
       "dependsOn": []
     },
     {
-      "comments": "Generalized from resource: '/subscriptions/d6876356-8975-4384-bbec-4be79f7fe030/resourceGroups/test/providers/Microsoft.Compute/virtualMachines/sonarqubepostgres/extensions/DockerExtension'.",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[variables('extensions_DockerExtension_name')]",
       "apiVersion": "2016-04-30-preview",

@@ -20,24 +20,8 @@
     "postgresVmAdminPassword": {
       "value": "L1nuxAdminPwd"
     },
-    "disks_OsDisk_name": {
-      "value": "sonarqubepostgres_OsDisk_1_995316d270574a0fb32b9682c7cfc98b"
-    },
     "virtualMachines_name": {
       "value": "sonarqubepostgresVM"
-    },
-    "networkInterfaces_name": {
-      "value": "sonarqubepostgres215"
-    },
-    "networkSecurityGroups_nsg_name": {
-      "value": "sonarqubepostgres-nsg"
-    },
-    "publicIPAddresses_ip_name": {
-      "value": "sonarqubepostgres-ip"
-    },
-    "virtualNetworks_test_vnet_name": {
-      "value": "test-vnet"
     }
-
   }
 }
