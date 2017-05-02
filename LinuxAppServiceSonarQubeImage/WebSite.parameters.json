@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "hostingPlanName": {
-      "value": "DockerSonarQubePlan"
+      "value": "SonarQubeAppServicePlan"
     },
     "skuName": {
       "value": "B2"
@@ -12,7 +12,7 @@
       "value": "sonarqube"
     },
     "webSiteName": {
-      "value": "SonarQubeAppServiceTestTemplate"
+      "value": "SonarQubeAppService"
     },
     "postgresVmAdminUser": {
       "value": "linuxadminuser"
