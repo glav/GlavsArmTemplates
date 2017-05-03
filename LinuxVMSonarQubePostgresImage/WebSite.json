@@ -1,0 +1,286 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "hostingPlanName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "skuName": {
+      "type": "string",
+      "defaultValue": "B2",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "metadata": {
+        "description": "Describes plan's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+      }
+    },
+    "skuCapacity": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "metadata": {
+        "description": "Describes plan's instance count"
+      }
+    },
+    "dockerRegistryImageName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "webSiteName": {
+      "type": "string",
+      "minLength": 5
+    },
+    "virtualMachines_name": {
+      "defaultValue": "sonarqubepostgresVM",
+      "type": "string"
+    },
+    "postgresVmAdminUser": {
+      "type": "string",
+      "minLength": 5
+    },
+    "postgresVmAdminPassword": {
+      "type": "string",
+      "minLength": 8
+    }
+
+  },
+  "variables": {
+    "instancePrefix": "[toLower(parameters('webSiteName'))]",
+    "networkInterfaceName": "[variables('instancePrefix')]",
+    "extensions_DockerExtension_name": "[concat(parameters('virtualMachines_name'),'/DockerExtension')]",
+    "networkInterfaces_name": "[concat(parameters('virtualMachines_name'),'-nic')]",
+    "publicIPAddresses_ip_name": "[concat(parameters('virtualMachines_name'),'-ip')]",
+    "networkSecurityGroups_nsg_name": "[concat(parameters('virtualMachines_name'),'-nsg')]",
+    "virtualNetworks_test_vnet_name": "[concat(parameters('virtualMachines_name'),'-vnet')]",
+    "postgres_default_user": "postgres",
+    "vmSize":"Standard_D1_v2"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('virtualMachines_name')]",
+      "apiVersion": "2016-04-30-preview",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "16.04.0-LTS",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "caching": "ReadWrite",
+            "diskSizeGB": 30
+          },
+          "dataDisks": []
+        },
+        "osProfile": {
+          "computerName": "[parameters('virtualMachines_name')]",
+          "adminUsername": "[parameters('postgresVmAdminUser')]",
+          "adminPassword": "[parameters('postgresVmAdminPassword')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": false
+          },
+          "secrets": []
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_name'))]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_name'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('networkInterfaces_name')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAddress": "10.0.1.4",
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_ip_name'))]"
+              },
+              "subnet": {
+                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworks_test_vnet_name')), '/subnets/default')]"
+              }
+            }
+          }
+        ],
+        "dnsSettings": {
+          "dnsServers": []
+        },
+        "enableIPForwarding": false,
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_nsg_name'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_ip_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworks_test_vnet_name'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_nsg_name'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('networkSecurityGroups_nsg_name')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "allow-ssh-in",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "postgres-allow",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "5432",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 110,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddresses_ip_name')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "idleTimeoutInMinutes": 4
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworks_test_vnet_name')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.1.0/24"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "default",
+            "properties": {
+              "addressPrefix": "10.0.1.0/24"
+            }
+          }
+        ]
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[variables('extensions_DockerExtension_name')]",
+      "apiVersion": "2016-04-30-preview",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "DockerExtension",
+        "typeHandlerVersion": "1.0",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "compose": {
+            "sonarqube": {
+              "image": "sonarqube",
+              "restart": "always",
+              "ports": [ "9000:9000" ],
+              "environment": [
+                "[concat('DOCKER_CUSTOM_IMAGE_NAME=',parameters('dockerRegistryImageName'))]",
+                "[concat('SONARQUBE_JDBC_USERNAME=',variables('postgres_default_user'))]",
+                "[concat('SONARQUBE_JDBC_PASSWORD=',parameters('postgresVmAdminPassword'))]",
+                "[concat('SONARQUBE_JDBC_URL=',concat('jdbc:postgresql://',reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddresses_ip_name')),'2016-10-01').ipAddress,'/postgres'))]"
+              ]
+            },
+            "postgres": {
+              "image": "postgres",
+              "restart": "always",
+              "ports": [
+                "5432:5432"
+              ],
+              "environment": [
+                "[concat('POSTGRES_PASSWORD=',parameters('postgresVmAdminPassword'))]"
+              ],
+              "volumes": [
+                "/var/lib/postgresql/data:/var/lib/postgresql/data"
+              ]
+            }
+          },
+          "docker": {
+            "port": ""
+          }
+        },
+        "protectedSettings": {
+          "certs": {
+            "ca": "",
+            "cert": "",
+            "key": ""
+          },
+          "environment": {
+            "POSTGRES_PASSWORD": "[concat(parameters('postgresVmAdminPassword'))]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_name'))]"
+      ]
+    }
+
+
+  ],
+  "outputs": {
+    "ipaddress": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddresses_ip_name')),'2016-10-01').ipAddress]",
+      "type": "string"
+    }
+  }
+}
