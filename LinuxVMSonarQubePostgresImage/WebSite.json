@@ -6,42 +6,9 @@
       "type": "string",
       "minLength": 1
     },
-    "skuName": {
-      "type": "string",
-      "defaultValue": "B2",
-      "allowedValues": [
-        "F1",
-        "D1",
-        "B1",
-        "B2",
-        "B3",
-        "S1",
-        "S2",
-        "S3",
-        "P1",
-        "P2",
-        "P3",
-        "P4"
-      ],
-      "metadata": {
-        "description": "Describes plan's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
-      }
-    },
-    "skuCapacity": {
-      "type": "int",
-      "defaultValue": 1,
-      "minValue": 1,
-      "metadata": {
-        "description": "Describes plan's instance count"
-      }
-    },
     "dockerRegistryImageName": {
       "type": "string",
       "minLength": 1
-    },
-    "webSiteName": {
-      "type": "string",
-      "minLength": 5
     },
     "virtualMachines_name": {
       "defaultValue": "sonarqubepostgresVM",
@@ -58,15 +25,14 @@
 
   },
   "variables": {
-    "instancePrefix": "[toLower(parameters('webSiteName'))]",
-    "networkInterfaceName": "[variables('instancePrefix')]",
+    "instancePrefix": "[toLower(parameters('virtualMachines_name'))]",
     "extensions_DockerExtension_name": "[concat(parameters('virtualMachines_name'),'/DockerExtension')]",
     "networkInterfaces_name": "[concat(parameters('virtualMachines_name'),'-nic')]",
     "publicIPAddresses_ip_name": "[concat(parameters('virtualMachines_name'),'-ip')]",
     "networkSecurityGroups_nsg_name": "[concat(parameters('virtualMachines_name'),'-nsg')]",
     "virtualNetworks_test_vnet_name": "[concat(parameters('virtualMachines_name'),'-vnet')]",
     "postgres_default_user": "postgres",
-    "vmSize":"Standard_D1_v2"
+    "vmSize": "Standard_DS2_v2"
   },
   "resources": [
     {
@@ -180,7 +146,35 @@
               "priority": 110,
               "direction": "Inbound"
             }
+          },
+          {
+            "name": "allow-http-in",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 120,
+              "direction": "Inbound"
+            },
+            {
+              "name": "allow-https-in",
+              "properties": {
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "destinationPortRange": "443",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 130,
+                "direction": "Inbound"
+              }
+            }
+
           }
+
         ]
       },
       "dependsOn": []

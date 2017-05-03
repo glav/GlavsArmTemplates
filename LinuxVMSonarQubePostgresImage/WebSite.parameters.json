@@ -5,14 +5,8 @@
     "hostingPlanName": {
       "value": "SonarQubeAppServicePlan"
     },
-    "skuName": {
-      "value": "B2"
-    },
     "dockerRegistryImageName": {
       "value": "sonarqube"
-    },
-    "webSiteName": {
-      "value": "SonarQubeAppService"
     },
     "postgresVmAdminUser": {
       "value": "linuxadminuser"
