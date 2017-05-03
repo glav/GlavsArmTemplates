@@ -7,7 +7,7 @@ It will perform the following:
 - Create a Linux based AppService plan
 - Create a Network interface, public IP address, network security group and VNET.
 - Creates a managed disk of 30Gb in size.
-- Create a Virtual machine with a docker extension configured to run postgres SQL (via dockerhub image).
+- Create a Virtual machine with a docker extension configured to run postgres SQL (via dockerhub image - vmSize set to Standard_D1_v2)
 - Hooks up the Virtual machine to the network resources and disk created previously.
 - Create an AppService (B2 - minimum required as it has 3.5Gb memory)
 - Configure the AppService to pull the SonarQube image from dockerHub

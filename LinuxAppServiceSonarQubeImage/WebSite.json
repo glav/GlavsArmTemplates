@@ -8,7 +8,7 @@
     },
     "skuName": {
       "type": "string",
-      "defaultValue": "F1",
+      "defaultValue": "B2",
       "allowedValues": [
         "F1",
         "D1",
@@ -65,7 +65,8 @@
     "publicIPAddresses_ip_name": "[concat(parameters('virtualMachines_name'),'-ip')]",
     "networkSecurityGroups_nsg_name": "[concat(parameters('virtualMachines_name'),'-nsg')]",
     "virtualNetworks_test_vnet_name": "[concat(parameters('virtualMachines_name'),'-vnet')]",
-    "postgres_default_user": "postgres"
+    "postgres_default_user": "postgres",
+    "vmSize":"Standard_D1_v2"
   },
   "resources": [
     {
@@ -142,7 +143,7 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_A1"
+          "vmSize": "[variables('vmSize')]"
         },
         "storageProfile": {
           "imageReference": {
