@@ -195,7 +195,10 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "publicIPAllocationMethod": "Static",
-        "idleTimeoutInMinutes": 4
+        "idleTimeoutInMinutes": 4,
+        "dnsSettings": {
+          "domainNameLabel": "source-code-analysis"
+        }
       },
       "dependsOn": []
     },

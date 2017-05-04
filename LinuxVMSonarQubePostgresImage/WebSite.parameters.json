@@ -9,7 +9,7 @@
       "value": "linuxadminuser"
     },
     "postgresVmAdminPassword": {
-      "value": "L1nuxAdminPwd"
+      "value": "Y0uShouldCh@ngeTh!s"
     },
     "virtualMachines_name": {
       "value": "sonarqubepostgresVM"
