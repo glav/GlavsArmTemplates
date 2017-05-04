@@ -236,7 +236,7 @@
             "sonarqube": {
               "image": "[parameters('dockerRegistryImageName')]",
               "restart": "always",
-              "ports": [ "9000:9000" ],
+              "ports": [ "9000:9000", "80:9000", "443:9000" ],
               "environment": [
                 "[concat('DOCKER_CUSTOM_IMAGE_NAME=',parameters('dockerRegistryImageName'))]",
                 "SONARQUBE_HOME=/opt/sonarqube",
@@ -245,10 +245,10 @@
                 "[concat('SONARQUBE_JDBC_URL=',concat('jdbc:postgresql://',reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddresses_ip_name')),'2016-10-01').ipAddress,'/postgres'))]"
               ],
               "volumes": [
-                "/opt/sonarqube/temp:/opt/sonarqube/temp",
-                "/opt/sonarqube/data:/opt/sonarqube/data",
-                "/opt/sonarqube/extensions:/opt/sonarqube/extensions",
-                "/opt/sonarqube/conf:/opt/sonarqube/conf"
+                "$SONARQUBE_HOME/data/temp",
+                "$SONARQUBE_HOME/data",
+                "$SONARQUBE_HOME/data/extensions",
+                "$SONARQUBE_HOME/data/conf"
               ]
             },
             "postgres": {

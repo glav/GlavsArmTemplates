@@ -1,5 +1,5 @@
 # Linux AppService and SonarQube
-This ARM template will create a Linux AppService and setup the service to use the SonarQube docker container from DockerHub.
+This ARM template will create a Linux VM and setup the service to use the SonarQube docker container from DockerHub as well as connect to a Postgres SQL database in a container on the same machine
 
 ## What it does
 It will perform the following:
