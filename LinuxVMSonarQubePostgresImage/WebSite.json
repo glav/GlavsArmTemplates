@@ -2,10 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "hostingPlanName": {
-      "type": "string",
-      "minLength": 1
-    },
     "dockerRegistryImageName": {
       "type": "string",
       "minLength": 1
@@ -158,22 +154,35 @@
               "access": "Allow",
               "priority": 120,
               "direction": "Inbound"
-            },
-            {
-              "name": "allow-https-in",
-              "properties": {
-                "protocol": "Tcp",
-                "sourcePortRange": "*",
-                "destinationPortRange": "443",
-                "sourceAddressPrefix": "*",
-                "destinationAddressPrefix": "*",
-                "access": "Allow",
-                "priority": 130,
-                "direction": "Inbound"
-              }
             }
-
+          },
+          {
+            "name": "allow-https-in",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "443",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 130,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "allow-sonar-in",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "9000",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 140,
+              "direction": "Inbound"
+            }
           }
+
 
         ]
       },
@@ -225,14 +234,21 @@
         "settings": {
           "compose": {
             "sonarqube": {
-              "image": "sonarqube",
+              "image": "[parameters('dockerRegistryImageName')]",
               "restart": "always",
               "ports": [ "9000:9000" ],
               "environment": [
                 "[concat('DOCKER_CUSTOM_IMAGE_NAME=',parameters('dockerRegistryImageName'))]",
+                "SONARQUBE_HOME=/opt/sonarqube",
                 "[concat('SONARQUBE_JDBC_USERNAME=',variables('postgres_default_user'))]",
                 "[concat('SONARQUBE_JDBC_PASSWORD=',parameters('postgresVmAdminPassword'))]",
                 "[concat('SONARQUBE_JDBC_URL=',concat('jdbc:postgresql://',reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddresses_ip_name')),'2016-10-01').ipAddress,'/postgres'))]"
+              ],
+              "volumes": [
+                "/opt/sonarqube/temp:/opt/sonarqube/temp",
+                "/opt/sonarqube/data:/opt/sonarqube/data",
+                "/opt/sonarqube/extensions:/opt/sonarqube/extensions",
+                "/opt/sonarqube/conf:/opt/sonarqube/conf"
               ]
             },
             "postgres": {
