@@ -240,10 +240,7 @@
               "image": "postgres",
               "restart": "always",
               "environment": [
-                "[concat('POSTGRES_PASSWORD=',parameters('postgresVmAdminPassword'))]",
-                "JAVA_OPTIONS=-Xmx8192m",
-                "JVM_OPTS=-Xmx8192m -Xms8192m",
-                "JAVA_OPTS=-Xmx8192m -Xms8192m"
+                "[concat('POSTGRES_PASSWORD=',parameters('postgresVmAdminPassword'))]"
 
               ],
               "volumes": [
@@ -260,10 +257,7 @@
                 "SONARQUBE_HOME=/opt/sonarqube",
                 "[concat('SONARQUBE_JDBC_USERNAME=',variables('postgres_default_user'))]",
                 "[concat('SONARQUBE_JDBC_PASSWORD=',parameters('postgresVmAdminPassword'))]",
-                "[concat('SONARQUBE_JDBC_URL=',concat('jdbc:postgresql://dbserver/postgres'))]",
-                "JAVA_OPTIONS=-Xmx8192m",
-                "JVM_OPTS=-Xmx8192m -Xms8192m",
-                "JAVA_OPTS=-Xmx8192m -Xms8192m"
+                "[concat('SONARQUBE_JDBC_URL=',concat('jdbc:postgresql://dbserver/postgres'))]"
               ],
               "volumes": [
                 "$SONARQUBE_HOME/data/temp",
