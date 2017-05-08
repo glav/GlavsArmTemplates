@@ -236,35 +236,43 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "compose": {
+            "postgres": {
+              "image": "postgres",
+              "restart": "always",
+              "environment": [
+                "[concat('POSTGRES_PASSWORD=',parameters('postgresVmAdminPassword'))]",
+                "JAVA_OPTIONS=-Xmx8192m",
+                "JVM_OPTS=-Xmx8192m -Xms8192m",
+                "JAVA_OPTS=-Xmx8192m -Xms8192m"
+
+              ],
+              "volumes": [
+                "/var/lib/postgresql/data:/var/lib/postgresql/data"
+              ]
+            },
+            
             "sonarqube": {
               "image": "[parameters('dockerRegistryImageName')]",
               "restart": "always",
-              "ports": [ "9000:9000", "80:9000", "443:9000" ],
+              "ports": [ "9000:9000","9092:9092", "80:9000" ],
               "environment": [
                 "[concat('DOCKER_CUSTOM_IMAGE_NAME=',parameters('dockerRegistryImageName'))]",
                 "SONARQUBE_HOME=/opt/sonarqube",
                 "[concat('SONARQUBE_JDBC_USERNAME=',variables('postgres_default_user'))]",
                 "[concat('SONARQUBE_JDBC_PASSWORD=',parameters('postgresVmAdminPassword'))]",
-                "[concat('SONARQUBE_JDBC_URL=',concat('jdbc:postgresql://',reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddresses_ip_name')),'2016-10-01').ipAddress,'/postgres'))]"
+                "[concat('SONARQUBE_JDBC_URL=',concat('jdbc:postgresql://dbserver/postgres'))]",
+                "JAVA_OPTIONS=-Xmx8192m",
+                "JVM_OPTS=-Xmx8192m -Xms8192m",
+                "JAVA_OPTS=-Xmx8192m -Xms8192m"
               ],
               "volumes": [
                 "$SONARQUBE_HOME/data/temp",
                 "$SONARQUBE_HOME/data",
                 "$SONARQUBE_HOME/data/extensions",
                 "$SONARQUBE_HOME/data/conf"
-              ]
-            },
-            "postgres": {
-              "image": "postgres",
-              "restart": "always",
-              "ports": [
-                "5432:5432"
               ],
-              "environment": [
-                "[concat('POSTGRES_PASSWORD=',parameters('postgresVmAdminPassword'))]"
-              ],
-              "volumes": [
-                "/var/lib/postgresql/data:/var/lib/postgresql/data"
+              "links":[
+                "postgres:dbserver"
               ]
             }
           },
