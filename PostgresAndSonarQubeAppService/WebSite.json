@@ -1,0 +1,211 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "hostingPlanName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "skuName": {
+      "type": "string",
+      "defaultValue": "B2",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "metadata": {
+        "description": "Describes plan's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+      }
+    },
+    "skuCapacity": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "metadata": {
+        "description": "Describes plan's instance count"
+      }
+    },
+    "dockerRegistryImageName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "webSiteName": {
+      "type": "string",
+      "minLength": 5
+    },
+    "postgresDatabaseName": {
+        "type": "string"
+    },
+    "postgresAdminLogin": {
+        "type": "string"
+    },
+    "postgresAdminLoginPassword": {
+        "type": "securestring"
+    },
+    "postgresServerName": {
+        "type": "string"
+    },
+    "postgresSkuName":{
+        "type": "string"
+    },
+    "postgresSkuCapacityDTU": {
+        "type": "int"
+    },
+    "postgresSkuFamily": {
+        "type": "string"
+    },
+    "postgresSkuSizeMB": {
+        "type": "int"
+    },
+    "postgresSkuTier": {
+        "type": "string"
+    },
+    "postgresVersion": {
+        "type": "string"
+    },
+    "postgresCharset": {
+        "type": "string"
+    },
+    "postgresCollation": {
+        "type": "string"
+    }
+  },
+  "variables": {
+    "instancePrefix": "[toLower(parameters('webSiteName'))]",
+    "networkInterfaceName": "[variables('instancePrefix')]",
+    "postgresServerAdminLoginName": "[concat(parameters('postgresAdminLogin'),'@',parameters('postgresServerName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[parameters('hostingPlanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "kind": "linux",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "HostingPlan"
+      },
+      "sku": {
+        "name": "[parameters('skuName')]",
+        "capacity": "[parameters('skuCapacity')]"
+      },
+      "properties": {
+        "name": "[parameters('hostingPlanName')]",
+        "kind": "linux",
+        "reserved": true
+      }
+    },
+
+    {
+      "apiVersion": "2016-08-01",
+      "name": "[parameters('webSiteName')]",
+      "type": "Microsoft.Web/sites",
+      "kind": "app",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource",
+        "displayName": "Website"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
+        "[resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('postgresServerName'))]"
+        
+
+      ],
+      "properties": {
+        "name": "[parameters('webSiteName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
+        "reserved": true,
+        "clientAffinityEnabled": false,
+
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "DOCKER_CUSTOM_IMAGE_NAME",
+              "value": "[parameters('dockerRegistryImageName')]"
+            },
+            {
+              "name": "SONARQUBE_JDBC_USERNAME",
+              "value": "[concat(parameters('postgresAdminLogin'),'@',parameters('postgresServerName'))]"
+            },
+            {
+              "name": "SONARQUBE_JDBC_PASSWORD",
+              "value": "[parameters('postgresAdminLoginPassword')]"
+            },
+            {
+              "name": "SONARQUBE_JDBC_URL",
+              "value": "[concat('jdbc:postgresql://',reference(resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('postgresServerName')),'2017-04-30-preview').fullyQualifiedDomainName,'/',parameters('postgresDatabaseName'))]"
+            }
+          ],
+          "appCommandLine": "",
+          "linuxFxVersion": "DOCKER|sonarqube"
+        }
+      }
+    },
+    {
+        "name": "[parameters('postgresServerName')]",
+        "type": "Microsoft.DBforPostgreSQL/servers",
+        "apiVersion": "2017-04-30-preview",
+        "location": "[resourceGroup().location]",
+        "properties": {
+            "version": "[parameters('postgresVersion')]",
+            "administratorLogin": "[parameters('postgresAdminLogin')]",
+            "administratorLoginPassword": "[parameters('postgresAdminLoginPassword')]",
+            "storageMB": "[parameters('postgresSkuSizeMB')]",
+            "sslEnforcement": "Disabled"
+        },
+        "sku": {
+            "name": "[parameters('postgresSkuName')]",
+            "tier": "[parameters('postgresSkuTier')]",
+            "capacity": "[parameters('postgresSkuCapacityDTU')]",
+            "size": "[parameters('postgresSkuSizeMB')]",
+            "family": "[parameters('postgresSkuFamily')]"
+        },
+        "resources": [
+            {
+                "name": "AllowAll",
+                "type": "firewallrules",
+                "apiVersion": "2017-04-30-preview",
+                "properties": {
+                    "startIpAddress": "0.0.0.0",
+                    "endIpAddress": "255.255.255.255"
+                },
+                "location": "[resourceGroup().location]",
+                "dependsOn": [
+                    "[concat('Microsoft.DBforPostgreSQL/servers/', parameters('postgresServerName'), '/databases/' , parameters('postgresDatabaseName'))]",
+                    "[concat('Microsoft.DBforPostgreSQL/servers/', parameters('postgresServerName'))]"
+                ]
+            },
+            {
+                "name": "[parameters('postgresDatabaseName')]",
+                "type": "databases",
+                "apiVersion": "2017-04-30-preview",
+                "properties": {
+                    "charset": "[parameters('postgresCharset')]",
+                    "collation": "[parameters('postgresCollation')]"
+                },
+                "dependsOn": [
+                    "[concat('Microsoft.DBforPostgreSQL/servers/', parameters('postgresServerName'))]"
+                ]
+            }
+        ]
+    }
+
+  ],
+  "outputs": {
+    "ipaddress": {
+      "value": "[reference(resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('postgresServerName')),'2017-04-30-preview').fullyQualifiedDomainName]",
+      "type": "string"
+    }
+  }
+}

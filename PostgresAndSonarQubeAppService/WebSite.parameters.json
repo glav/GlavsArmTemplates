@@ -1,0 +1,56 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "hostingPlanName": {
+      "value": "SonarQubeAppServicePlan"
+    },
+    "skuName": {
+      "value": "B2"
+    },
+    "dockerRegistryImageName": {
+      "value": "sonarqube"
+    },
+    "webSiteName": {
+      "value": "SonarQubeAnalysisAppService"
+    },
+
+    "postgresDatabaseName": {
+        "value": "mypostgresdbname"
+    },
+    "postgresAdminLogin": {
+        "value": "postgresqldbuser"
+    },
+    "postgresAdminLoginPassword": {
+        "value": "Ch@ngeMePlease"
+    },
+    "postgresServerName": {
+        "value": "mysonarqubepostgresqldbserver"
+    },
+    "postgresSkuCapacityDTU": {
+        "value": 100
+    },
+    "postgresSkuFamily": {
+        "value": "SkuFamily"
+    },
+    "postgresSkuName": {
+        "value": "PGSQLB100"
+    },
+    "postgresSkuSizeMB": {
+        "value": 51200
+    },
+    "postgresSkuTier": {
+        "value": "Basic"
+    },
+    "postgresVersion": {
+        "value": "9.6"
+    },
+    "postgresCollation": {
+        "value": "en_US.utf8"
+    },
+    "postgresCharset": {
+        "value": "utf8"
+    }
+
+  }
+}
