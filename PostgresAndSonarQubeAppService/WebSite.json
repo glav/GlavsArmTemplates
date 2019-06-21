@@ -144,7 +144,11 @@
             },
             {
               "name": "SONARQUBE_JDBC_URL",
-              "value": "[concat('jdbc:postgresql://',reference(resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('postgresServerName')),'2017-04-30-preview').fullyQualifiedDomainName,'/',parameters('postgresDatabaseName'))]"
+              "value": "[concat('jdbc:postgresql://',reference(resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('postgresServerName')),'2017-12-01').fullyQualifiedDomainName,'/',parameters('postgresDatabaseName'))]"
+            },
+            {
+              "name": "vm.max_map_count",
+              "value": "262144"
             }
           ],
           "appCommandLine": "",
@@ -155,7 +159,7 @@
     {
         "name": "[parameters('postgresServerName')]",
         "type": "Microsoft.DBforPostgreSQL/servers",
-        "apiVersion": "2017-04-30-preview",
+        "apiVersion": "2017-12-01",
         "location": "[resourceGroup().location]",
         "properties": {
             "version": "[parameters('postgresVersion')]",
@@ -175,7 +179,7 @@
             {
                 "name": "AllowAll",
                 "type": "firewallrules",
-                "apiVersion": "2017-04-30-preview",
+                "apiVersion": "2017-12-01",
                 "properties": {
                     "startIpAddress": "0.0.0.0",
                     "endIpAddress": "255.255.255.255"
@@ -189,7 +193,7 @@
             {
                 "name": "[parameters('postgresDatabaseName')]",
                 "type": "databases",
-                "apiVersion": "2017-04-30-preview",
+                "apiVersion": "2017-12-01",
                 "properties": {
                     "charset": "[parameters('postgresCharset')]",
                     "collation": "[parameters('postgresCollation')]"
@@ -204,7 +208,7 @@
   ],
   "outputs": {
     "ipaddress": {
-      "value": "[reference(resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('postgresServerName')),'2017-04-30-preview').fullyQualifiedDomainName]",
+      "value": "[reference(resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('postgresServerName')),'2017-12-01').fullyQualifiedDomainName]",
       "type": "string"
     }
   }

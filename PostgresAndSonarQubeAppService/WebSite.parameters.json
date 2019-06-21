@@ -28,19 +28,19 @@
         "value": "mysonarqubepostgresqldbserver"
     },
     "postgresSkuCapacityDTU": {
-        "value": 100
+        "value": 2
     },
     "postgresSkuFamily": {
-        "value": "SkuFamily"
+        "value": "Gen5"
     },
     "postgresSkuName": {
-        "value": "PGSQLB100"
+        "value": "GP_Gen5_2"
     },
     "postgresSkuSizeMB": {
         "value": 51200
     },
     "postgresSkuTier": {
-        "value": "Basic"
+        "value": "GeneralPurpose"
     },
     "postgresVersion": {
         "value": "9.6"
